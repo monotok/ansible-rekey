@@ -15,9 +15,53 @@ type MockCmdExecutor struct {
 	mock.Mock
 }
 
-func (ce *MockCmdExecutor) Execute(inventoryFile string) error {
-	args := ce.Called(inventoryFile)
+func (ce *MockCmdExecutor) Execute(vaultFile string) error {
+	args := ce.Called(vaultFile)
 	return args.Error(0)
+}
+
+func Test_ExecuteCommand(t *testing.T) {
+	tests := map[string]struct {
+		args             string
+		expectedCmdFlags any
+		returnArgs       any
+	}{
+		"valid short hand args": {
+			args:             "-v .vault",
+			expectedCmdFlags: ".vault",
+		},
+		"valid long hand args": {
+			args:             "--vault .vault",
+			expectedCmdFlags: ".vault",
+		},
+	}
+	for name, tc := range tests {
+		t.Run(name, func(t *testing.T) {
+			bStdOut, bStdErr := bytes.NewBufferString(""), bytes.NewBufferString("")
+
+			rootCmd := setupRootCmd(strings.Split(tc.args, " "), bStdOut, bStdErr)
+
+			mockCmdExecutor := new(MockCmdExecutor)
+			mockCmdExecutor.On("Execute", tc.expectedCmdFlags).Return(tc.returnArgs)
+			defer mockCmdExecutor.AssertExpectations(t)
+
+			rootCmd.WithExecutor(mockCmdExecutor)
+
+			err := rootCmd.Execute()
+			require.NoError(t, err)
+
+			stdOut, err := io.ReadAll(bStdOut)
+			require.NoError(t, err)
+
+			stdErr, err := io.ReadAll(bStdErr)
+			require.NoError(t, err)
+
+			assert.Empty(t, string(stdOut))
+			assert.Empty(t, string(stdErr))
+
+			mockCmdExecutor.AssertExpectations(t)
+		})
+	}
 }
 
 func Test_ExecuteCommand_Errors(t *testing.T) {
