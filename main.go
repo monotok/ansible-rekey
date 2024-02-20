@@ -9,8 +9,9 @@ import (
 )
 
 func main() {
-	rootCmd := cmd.NewRootCmd()
-	err := rootCmd.Execute()
+	rekeyCli := cmd.NewRekeyCli()
+	cmd := cmd.NewCliCommand(rekeyCli)
+	err := cmd.Execute()
 	if err != nil {
 		log.Fatal(err)
 	}
