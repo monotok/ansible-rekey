@@ -1,8 +1,8 @@
 package ansible
 
 import (
-	"ansible-rekey/common"
 	"bytes"
+	"github.com/monotok/ansible-utils/common"
 	"gopkg.in/yaml.v3"
 	"io"
 	"io/fs"

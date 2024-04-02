@@ -4,7 +4,7 @@ Copyright © 2024 NAME HERE <EMAIL ADDRESS>
 package main
 
 import (
-	"ansible-rekey/cmd"
+	"github.com/monotok/ansible-utils/cmd"
 	"log"
 )
 

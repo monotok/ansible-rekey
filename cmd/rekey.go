@@ -1,9 +1,9 @@
 package cmd
 
 import (
-	"ansible-rekey/ansible"
-	"ansible-rekey/rekey"
 	"fmt"
+	"github.com/monotok/ansible-utils/ansible"
+	"github.com/monotok/ansible-utils/rekey"
 	"github.com/spf13/cobra"
 	"golang.org/x/crypto/ssh/terminal"
 	"log"

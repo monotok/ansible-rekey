@@ -1,8 +1,8 @@
 package rekey
 
 import (
-	"ansible-rekey/common"
 	"bytes"
+	"github.com/monotok/ansible-utils/common"
 	log "github.com/sirupsen/logrus"
 	vault "github.com/sosedoff/ansible-vault-go"
 	"gopkg.in/yaml.v3"

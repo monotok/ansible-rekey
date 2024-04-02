@@ -1,4 +1,4 @@
-module ansible-rekey
+module github.com/monotok/ansible-utils
 
 go 1.21
 
