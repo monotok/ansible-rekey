@@ -2,7 +2,7 @@
 
 **STATUS**
 
-Very early beta. Use at your
+Very early beta. Use at your own risk.
 
 A collection of ansible utility functions. Currently only supports `rekey` which recursively rekeys encrypted variables within a directory.
 
