@@ -1,33 +1,23 @@
 package ansible
 
 import (
+	"ansible-rekey/common"
 	"bytes"
-	"fmt"
 	"gopkg.in/yaml.v3"
 	"io"
 	"io/fs"
+	"log"
 	"os"
 	"path/filepath"
 	"slices"
 	"strings"
 )
 
-var (
-	vaultHeader = []byte("$ANSIBLE_VAULT;1.1;AES256")
-)
-
-type YamlEditor interface {
-	run(path string, yml map[string]yaml.Node)
+type Executor interface {
+	Run(currentPassword, newPassword string, yml map[string]yaml.Node) []byte
 }
 
-type Yaml struct{}
-
-func (y Yaml) run(path string, yml map[string]yaml.Node) {
-	fmt.Println(path)
-	fmt.Println(yaml.Marshal(yml))
-}
-
-func Walk(root string, y YamlEditor) error {
+func Walk(root, currentPassword, newPassword string, e Executor) error {
 	return filepath.WalkDir(root, func(path string, d fs.DirEntry, err error) error {
 		if err != nil {
 			return err
@@ -47,13 +37,18 @@ func Walk(root string, y YamlEditor) error {
 		if yml == nil {
 			return nil
 		}
-		y.run(path, yml)
+		result := e.Run(currentPassword, newPassword, yml)
+		err = os.WriteFile(path, result, 0644)
+		if err != nil {
+			log.Fatal(err)
+		}
 		return nil
 	})
 }
 
 func openAndParseFile(path string) (map[string]yaml.Node, error) {
 	file, err := os.Open(path)
+	defer file.Close()
 	if err != nil {
 		return nil, err
 	}
@@ -66,11 +61,11 @@ func ParseFile(file io.Reader) (map[string]yaml.Node, error) {
 	if err != nil {
 		return nil, err
 	}
-	if bytes.HasPrefix(content, vaultHeader) {
+	if bytes.HasPrefix(content, common.VaultHeader) {
 		return nil, nil
 	}
 
 	yml := make(map[string]yaml.Node)
-	err = yaml.Unmarshal(content, &yml)
+	err = yaml.Unmarshal(content, yml)
 	return yml, err
 }

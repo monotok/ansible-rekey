@@ -3,6 +3,7 @@ module ansible-rekey
 go 1.21
 
 require (
+	github.com/sirupsen/logrus v1.9.3
 	github.com/sosedoff/ansible-vault-go v0.2.0
 	github.com/spf13/cobra v1.8.0
 	github.com/stretchr/testify v1.8.4

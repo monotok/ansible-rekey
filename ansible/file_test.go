@@ -10,13 +10,16 @@ import (
 	"testing"
 )
 
-type MockYamlEditor struct {
+type MockExecutor struct {
 	mock.Mock
 	executedFiles []string
 }
 
-func (ye *MockYamlEditor) run(path string, _ map[string]yaml.Node) {
-	ye.executedFiles = append(ye.executedFiles, path)
+func (ye *MockExecutor) Run(_, _ string, node map[string]yaml.Node) []byte {
+	for _, v := range node {
+		ye.executedFiles = append(ye.executedFiles, v.Value)
+	}
+	return []byte{}
 }
 
 func TestFile(t *testing.T) {
@@ -47,17 +50,17 @@ func TestFile(t *testing.T) {
 		tmpDir := t.TempDir()
 		fileNames := []string{tmpDir + "/values.yml", tmpDir + "/values2.yml"}
 
-		err := os.WriteFile(fileNames[0], []byte("my_var: value"), 777)
+		err := os.WriteFile(fileNames[0], []byte("my_var: value"), 0777)
 		require.NoError(t, err)
 
-		err = os.WriteFile(fileNames[1], []byte("my_var: value"), 777)
+		err = os.WriteFile(fileNames[1], []byte("my_var: value2"), 0777)
 		require.NoError(t, err)
 
-		mockYamlEditor := MockYamlEditor{}
-		err = Walk(tmpDir, &mockYamlEditor)
+		mockYamlEditor := MockExecutor{}
+		err = Walk(tmpDir, "", "", &mockYamlEditor)
 		require.NoError(t, err)
-		assert.Equal(t, mockYamlEditor.executedFiles[0], tmpDir+"/values.yml")
-		assert.Equal(t, mockYamlEditor.executedFiles[1], tmpDir+"/values2.yml")
+		assert.Equal(t, mockYamlEditor.executedFiles[0], "value")
+		assert.Equal(t, mockYamlEditor.executedFiles[1], "value2")
 
 	})
 
@@ -67,8 +70,8 @@ func TestFile(t *testing.T) {
 		err := os.WriteFile(tmpDir+"/values.txt", []byte("my_var: value"), 777)
 		require.NoError(t, err)
 
-		mockYamlEditor := MockYamlEditor{}
-		err = Walk(tmpDir, &mockYamlEditor)
+		mockYamlEditor := MockExecutor{}
+		err = Walk(tmpDir, "", "", &mockYamlEditor)
 		require.NoError(t, err)
 		assert.Empty(t, mockYamlEditor.executedFiles)
 
@@ -82,8 +85,8 @@ func TestFile(t *testing.T) {
 		err = os.WriteFile(tmpDir+"/values.txt", []byte("my_var: value"), 777)
 		require.NoError(t, err)
 
-		mockYamlEditor := MockYamlEditor{}
-		err = Walk(tmpDir, &mockYamlEditor)
+		mockYamlEditor := MockExecutor{}
+		err = Walk(tmpDir, "", "", &mockYamlEditor)
 		require.NoError(t, err)
 		assert.Empty(t, mockYamlEditor.executedFiles)
 

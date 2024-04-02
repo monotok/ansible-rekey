@@ -1,6 +1,8 @@
 package cmd
 
 import (
+	"ansible-rekey/ansible"
+	"ansible-rekey/rekey"
 	"fmt"
 	"github.com/spf13/cobra"
 	"golang.org/x/crypto/ssh/terminal"
@@ -30,7 +32,8 @@ func (cli *RekeyCli) Rekey(ansibleDirectory, vaultFile string) error {
 	fmt.Println("Old password: " + password)
 	fmt.Println("Enter the new password: ")
 	pass, _ := terminal.ReadPassword(0)
-	fmt.Println("You entered " + string(pass))
+	e := rekey.Execute{}
+	ansible.Walk(ansibleDirectory, password, string(pass), &e)
 
 	return nil
 }
